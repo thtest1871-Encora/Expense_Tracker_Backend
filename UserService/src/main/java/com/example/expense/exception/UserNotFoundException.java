@@ -1,0 +1,7 @@
+package com.example.expense.exception;
+
+public class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(String msg) {
+        super(msg);
+    }
+}
