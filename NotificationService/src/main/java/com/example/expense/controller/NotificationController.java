@@ -1,6 +1,7 @@
 package com.example.expense.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.expense.dto.ApiResponse;
 import com.example.expense.dto.SubscriptionDto;
 import com.example.expense.dto.TransactionEvent;
 import com.example.expense.model.Notification;
 import com.example.expense.service.NotificationService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/notifications")
@@ -26,32 +30,43 @@ public class NotificationController {
         this.service = service;
     }
 
-    @GetMapping("/{userId}")
-    public List<Notification> get(@PathVariable Long userId) {
-        return service.getUserNotifications(userId);
+    @GetMapping
+    public ApiResponse<List<Notification>> get(HttpServletRequest request) {
+        String userIdHeader = request.getHeader("X-User-Id");
+        if (userIdHeader == null) throw new RuntimeException("Missing header");
+        
+        Long userId = Long.valueOf(userIdHeader);
+        return ApiResponse.success("Notifications retrieved", service.getUserNotifications(userId));
     }
 
+
     @PostMapping("/transaction")
-    public String tx(@RequestBody TransactionEvent e) {
+    public ApiResponse<String> tx(@RequestBody TransactionEvent e) {
         service.createTransactionNotification(e);
-        return "ok";
+        return ApiResponse.success("Transaction notification processed", "ok");
     }
 
     @DeleteMapping("/by-transaction/{id}")
-    public String del(@PathVariable Long id) {
+    public ApiResponse<String> del(@PathVariable Long id) {
         service.deleteByTransactionId(id);
-        return "deleted";
+        return ApiResponse.success("Deleted by transaction id", "deleted");
     }
 
     @PostMapping("/subscription-expiring")
-    public String sub(@RequestBody SubscriptionDto dto) {
+    public ApiResponse<String> sub(@RequestBody SubscriptionDto dto) {
         service.createSubscriptionExpiryNotification(dto);
-        return "ok";
+        return ApiResponse.success("Subscription notification processed", "ok");
+    }
+
+    @PostMapping("/send")
+    public ApiResponse<String> send(@RequestBody Map<String, Object> req) {
+        service.createGenericNotification(req);
+        return ApiResponse.success("Notification sent", "ok");
     }
 
     @DeleteMapping("/{id}")
-    public String del2(@PathVariable Long id) {
+    public ApiResponse<String> del2(@PathVariable Long id) {
         service.deleteNotificationById(id);
-        return "deleted";
+        return ApiResponse.success("Notification deleted", "deleted");
     }
 }

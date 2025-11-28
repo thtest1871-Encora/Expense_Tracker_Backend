@@ -1,37 +1,41 @@
 package com.authservice.demo.controller;
 
 import com.authservice.demo.dto.*;
+import com.authservice.demo.model.UserCredential;
 import com.authservice.demo.security.JwtUtil;
-import com.authservice.demo.client.UserClient;
+import com.authservice.demo.service.AuthService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final JwtUtil jwtUtil;
-    private final UserClient userClient;
+    private final AuthService authService;
 
-    public AuthController(JwtUtil jwtUtil, UserClient userClient) {
+    public AuthController(JwtUtil jwtUtil, AuthService authService) {
         this.jwtUtil = jwtUtil;
-        this.userClient = userClient;
+        this.authService = authService;
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest req) {
-        UserResponse saved = userClient.register(req);
-        return "User registered: " + saved.getId();
+    public ApiResponse<Map<String, Object>> register(@RequestBody RegisterRequest req) {
+        UserCredential user = authService.register(req);
+        return ApiResponse.success("User registered successfully", Map.of("userId", user.getId()));
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest req) {
-        UserResponse user = userClient.validateLogin(req);
-        if (user == null) return "Invalid credentials!";
-        return jwtUtil.generateToken(user.getId());
+    public ApiResponse<Map<String, String>> login(@RequestBody LoginRequest req) {
+        UserCredential user = authService.login(req);
+        String token = jwtUtil.generateToken(user.getId());
+        return ApiResponse.success("Login successful", Map.of("token", token));
     }
 
     @GetMapping("/validate")
-    public boolean validate(@RequestParam String token) {
-        return jwtUtil.validate(token);
+    public ApiResponse<Boolean> validate(@RequestParam String token) {
+        boolean isValid = jwtUtil.validate(token);
+        return ApiResponse.success("Token validation result", isValid);
     }
 }

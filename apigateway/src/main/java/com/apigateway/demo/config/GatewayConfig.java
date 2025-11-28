@@ -12,24 +12,14 @@ public class GatewayConfig {
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
 
         return builder.routes()
-
                 .route("auth-service", r -> r.path("/auth/**")
                         .uri("lb://auth-service"))
-
-                .route("user-service", r -> r.path("/users/**")
-                        .uri("lb://user-service"))
 
                 .route("transaction-service", r -> r.path("/transactions/**")
                         .uri("lb://transaction-service"))
 
-                .route("vault-service", r -> r.path("/vault/**")
-                        .uri("lb://vault-service"))
-
                 .route("notification-service", r -> r.path("/notifications/**")
                         .uri("lb://notification-service"))
-
-                .route("subscription-service", r -> r.path("/subscriptions/**")
-                        .uri("lb://subscription-service"))
 
                 .route("category-service", r -> r.path("/categories/**")
                         .uri("lb://category-service"))

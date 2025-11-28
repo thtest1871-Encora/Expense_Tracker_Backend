@@ -1,6 +1,7 @@
 package com.example.expense.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,36 +11,38 @@ import com.example.expense.dto.TransactionEvent;
 import com.example.expense.model.Notification;
 import com.example.expense.repository.NotificationRepository;
 
-
 @Service
 public class NotificationService {
 
     private final NotificationRepository repo;
-    private final SubscriptionClient subscriptionClient;
+    // private final SubscriptionClient subscriptionClient; // Removed as Subscription Service pushes notifications now
 
-    public NotificationService(NotificationRepository repo, SubscriptionClient subscriptionClient) {
+    public NotificationService(NotificationRepository repo) {
         this.repo = repo;
-        this.subscriptionClient = subscriptionClient;
     }
 
     @Transactional
     public void createTransactionNotification(TransactionEvent e) {
         if (e == null || e.getId() == null) return;
 
+        // Prevent duplicate notifications
         if (repo.existsByTxnIdAndUserId(e.getId(), e.getUserId())) return;
 
-        String type = e.getType().equalsIgnoreCase("Income") ? "Income" : "Expense";
-        
         String message;
-        
-        if(type == "Income") {
-        	message = "₹" + e.getAmount() + " recieved from " + e.getCategory();
-        }
-        else {
-        	message = "₹" + e.getAmount() + " spent on " + e.getCategory();
+
+        if ("Income".equalsIgnoreCase(e.getType())) {
+            message = "₹" + e.getAmount() + " received from " + e.getCategory();
+        } else {
+            message = "₹" + e.getAmount() + " spent on " + e.getCategory();
         }
 
-        Notification n = new Notification(e.getUserId(), "TRANSACTION", message, e.getId(), null);
+        Notification n = new Notification(
+                e.getUserId(),
+                "TRANSACTION",
+                message,
+                e.getId(),
+                null
+        );
 
         repo.save(n);
     }
@@ -50,8 +53,30 @@ public class NotificationService {
 
         String message = "Your " + s.getName() + " subscription expires on " + s.getExpiryDate();
 
-        Notification n = new Notification(s.getUserId(), "SUBSCRIPTION", message, null, s.getId());
+        Notification n = new Notification(
+                s.getUserId(),
+                "SUBSCRIPTION",
+                message,
+                null,
+                s.getId()
+        );
 
+        repo.save(n);
+    }
+
+    @Transactional
+    public void createGenericNotification(Map<String, Object> req) {
+        Long userId = ((Number) req.get("userId")).longValue();
+        String message = (String) req.get("message");
+        String type = (String) req.get("type");
+
+        Notification n = new Notification(
+                userId,
+                type,
+                message,
+                null,
+                null
+        );
         repo.save(n);
     }
 
@@ -69,12 +94,5 @@ public class NotificationService {
 
     public void deleteBySubscriptionId(Long subId) {
         repo.deleteBySubscriptionId(subId);
-    }
-
-    public void checkAndCreateExpiryNotifications(int days) {
-        List<SubscriptionDto> subs = subscriptionClient.fetchExpiring(days);
-        if (subs != null) {
-            for (SubscriptionDto s : subs) createSubscriptionExpiryNotification(s);
-        }
     }
 }
