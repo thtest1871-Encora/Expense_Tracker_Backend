@@ -57,4 +57,39 @@ public class VaultController {
         vaultService.deleteFile(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/filter")
+    public ResponseEntity<List<VaultFile>> filter(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
+
+        // date range must always exist
+        if (from == null || to == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        LocalDate startDate = LocalDate.parse(from);
+        LocalDate endDate = LocalDate.parse(to);
+
+        List<VaultFile> result;
+
+        // CASE 2: date range + category
+        if (category != null && !category.isEmpty()) {
+            result = vaultService.filterByCategoryAndDateRange(
+                    userId, category, startDate, endDate
+            );
+        }
+        // CASE 1: only date range
+        else {
+            result = vaultService.filterByDateRange(
+                    userId, startDate, endDate
+            );
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 }

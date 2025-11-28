@@ -86,6 +86,18 @@ public class VaultService {
     public List<VaultFile> listFiles(Long userId) {
         return vaultRepo.findByUserIdOrderByCreatedAtDesc(userId);
     }
+    
+    public List<VaultFile> filterByDateRange(Long userId, LocalDate start, LocalDate end) {
+        return vaultRepo.findByUserIdAndDateBetweenOrderByCreatedAtDesc(userId, start, end);
+    }
+
+    public List<VaultFile> filterByCategoryAndDateRange(Long userId, String category,
+                                                        LocalDate start, LocalDate end) {
+        return vaultRepo.findByUserIdAndCategoryAndDateBetweenOrderByCreatedAtDesc(
+                userId, category, start, end
+        );
+    }
+
 
     public void deleteFile(Long id) {
 
