@@ -21,7 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<Map<String, Object>> register(@RequestBody RegisterRequest req) {
+    public ApiResponse<Map<String, Object>> register(@RequestBody @jakarta.validation.Valid RegisterRequest req) {
         UserCredential user = authService.register(req);
         return ApiResponse.success("User registered successfully", Map.of("userId", user.getId()));
     }

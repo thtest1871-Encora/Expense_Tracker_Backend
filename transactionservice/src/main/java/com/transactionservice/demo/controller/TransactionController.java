@@ -28,7 +28,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ApiResponse<Transaction> create(@RequestBody CreateTransactionRequest req,
+    public ApiResponse<Transaction> create(@RequestBody @jakarta.validation.Valid CreateTransactionRequest req,
                               HttpServletRequest request) {
         Transaction tx = service.create(getUserIdFromRequest(request), req);
         return ApiResponse.success("Transaction created successfully", tx);

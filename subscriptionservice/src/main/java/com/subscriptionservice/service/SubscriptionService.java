@@ -49,6 +49,21 @@ public class SubscriptionService {
         repository.deleteById(id);
     }
 
+    public List<Map<String, Object>> getPredefinedPlans() {
+        return List.of(
+            Map.of("platform", "Netflix", "plan", "Basic", "amount", 199, "cycle", "MONTHLY"),
+            Map.of("platform", "Netflix", "plan", "Standard", "amount", 499, "cycle", "MONTHLY"),
+            Map.of("platform", "Netflix", "plan", "Premium", "amount", 649, "cycle", "MONTHLY"),
+            Map.of("platform", "Amazon Prime", "plan", "Monthly", "amount", 179, "cycle", "MONTHLY"),
+            Map.of("platform", "Amazon Prime", "plan", "Yearly", "amount", 1499, "cycle", "YEARLY"),
+            Map.of("platform", "Spotify", "plan", "Individual", "amount", 119, "cycle", "MONTHLY"),
+            Map.of("platform", "Spotify", "plan", "Duo", "amount", 149, "cycle", "MONTHLY"),
+            Map.of("platform", "Spotify", "plan", "Family", "amount", 179, "cycle", "MONTHLY"),
+            Map.of("platform", "Disney+", "plan", "Monthly", "amount", 299, "cycle", "MONTHLY"),
+            Map.of("platform", "Disney+", "plan", "Annual", "amount", 1499, "cycle", "YEARLY")
+        );
+    }
+
     private LocalDate calculateNextDueDate(String cycle) {
         LocalDate today = LocalDate.now();
         if ("WEEKLY".equalsIgnoreCase(cycle)) return today.plusWeeks(1);

@@ -19,7 +19,7 @@ public class SubscriptionController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<Subscription> addSubscription(@RequestHeader("X-User-Id") Long userId, @RequestBody SubscriptionRequest req) {
+    public ApiResponse<Subscription> addSubscription(@RequestHeader("X-User-Id") Long userId, @RequestBody @jakarta.validation.Valid SubscriptionRequest req) {
         Subscription sub = service.addSubscription(userId, req);
         return ApiResponse.success("Subscription added successfully", sub);
     }
@@ -34,6 +34,11 @@ public class SubscriptionController {
     public ApiResponse<List<Subscription>> getUpcomingRenewals() {
         List<Subscription> subs = service.getUpcomingRenewals();
         return ApiResponse.success("Upcoming renewals retrieved", subs);
+    }
+
+    @GetMapping("/plans")
+    public ApiResponse<List<java.util.Map<String, Object>>> getPredefinedPlans() {
+        return ApiResponse.success("Predefined plans retrieved", service.getPredefinedPlans());
     }
 
     @DeleteMapping("/{id}")
