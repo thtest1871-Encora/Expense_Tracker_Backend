@@ -95,4 +95,9 @@ public class NotificationService {
     public void deleteBySubscriptionId(Long subId) {
         repo.deleteBySubscriptionId(subId);
     }
+    
+    @Transactional
+    public void deleteAllNotifications(Long userId) {
+    	repo.deleteByUserId(userId);
+    }
 }

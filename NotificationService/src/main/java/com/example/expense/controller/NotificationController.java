@@ -65,8 +65,15 @@ public class NotificationController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<String> del2(@PathVariable Long id) {
+    public ApiResponse<String> del2(@PathVariable Long id, HttpServletRequest request) {
         service.deleteNotificationById(id);
+        return ApiResponse.success("Notification deleted", "deleted");
+    }
+    
+    @DeleteMapping("/delete-all")
+    public ApiResponse<String> del3(HttpServletRequest request) {
+    	Long userId = Long.valueOf(request.getHeader("X-User-Id"));
+        service.deleteAllNotifications(userId);
         return ApiResponse.success("Notification deleted", "deleted");
     }
 }
