@@ -2,22 +2,26 @@ package com.example.expense.dto;
 
 public class TransactionEvent {
 
-    private Long id;         // transaction id
+    private Long id;
     private Long userId;
-    private String type;     // CREDIT / DEBIT
+    private String type;     // INCOME / EXPENSE
     private Double amount;
-    private String category; // category name or id (string for flexibility)
-    private String note;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryEmoji;
+    private String description;
 
     public TransactionEvent() {}
 
-    public TransactionEvent(Long id, Long userId, String type, Double amount, String category, String note) {
+    public TransactionEvent(Long id, Long userId, String type, Double amount, Long categoryId, String categoryName, String categoryEmoji, String description) {
         this.id = id;
         this.userId = userId;
         this.type = type;
         this.amount = amount;
-        this.category = category;
-        this.note = note;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.categoryEmoji = categoryEmoji;
+        this.description = description;
     }
 
     public Long getId() { return id; }
@@ -32,11 +36,17 @@ public class TransactionEvent {
     public Double getAmount() { return amount; }
     public void setAmount(Double amount) { this.amount = amount; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
-    public String getNote() { return note; }
-    public void setNote(String note) { this.note = note; }
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public String getCategoryEmoji() { return categoryEmoji; }
+    public void setCategoryEmoji(String categoryEmoji) { this.categoryEmoji = categoryEmoji; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     @Override
     public String toString() {
@@ -45,8 +55,10 @@ public class TransactionEvent {
                 ", userId=" + userId +
                 ", type='" + type + '\'' +
                 ", amount=" + amount +
-                ", category='" + category + '\'' +
-                ", note='" + note + '\'' +
+                ", categoryId=" + categoryId +
+                ", categoryName='" + categoryName + '\'' +
+                ", categoryEmoji='" + categoryEmoji + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

@@ -1,6 +1,8 @@
 package com.example.expense.service;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ import com.example.expense.repository.NotificationRepository;
 public class NotificationService {
 
     private final NotificationRepository repo;
-    // private final SubscriptionClient subscriptionClient; // Removed as Subscription Service pushes notifications now
 
     public NotificationService(NotificationRepository repo) {
         this.repo = repo;
@@ -29,11 +30,16 @@ public class NotificationService {
         if (repo.existsByTxnIdAndUserId(e.getId(), e.getUserId())) return;
 
         String message;
+        String catName = e.getCategoryName() != null ? e.getCategoryName() : "Unknown";
+        String emoji = e.getCategoryEmoji() != null ? e.getCategoryEmoji() : "";
+        
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale.Builder().setLanguage("en").setRegion("IN").build());
+        String formattedAmount = currencyFormat.format(e.getAmount());
 
-        if ("Income".equalsIgnoreCase(e.getType())) {
-            message = "₹" + e.getAmount() + " received from " + e.getCategory();
+        if ("INCOME".equalsIgnoreCase(e.getType())) {
+            message = emoji + " " + formattedAmount + " received from " + catName;
         } else {
-            message = "₹" + e.getAmount() + " spent on " + e.getCategory();
+            message = emoji + " " + formattedAmount + " spent on " + catName;
         }
 
         Notification n = new Notification(
@@ -99,5 +105,10 @@ public class NotificationService {
     @Transactional
     public void deleteAllNotifications(Long userId) {
     	repo.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void markAllAsRead(Long userId) {
+        repo.markAllAsRead(userId);
     }
 }

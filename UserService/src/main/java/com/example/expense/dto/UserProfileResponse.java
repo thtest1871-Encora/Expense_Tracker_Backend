@@ -1,6 +1,6 @@
 package com.example.expense.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class UserProfileResponse {
 
@@ -8,8 +8,8 @@ public class UserProfileResponse {
     private String fullName;
     private String phone;
     private String avatarUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 	public Long getUserId() {
 		return userId;
 	}
@@ -34,16 +34,16 @@ public class UserProfileResponse {
 	public void setAvatarUrl(String avatarUrl) {
 		this.avatarUrl = avatarUrl;
 	}
-	public LocalDateTime getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(LocalDateTime createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
-	public LocalDateTime getUpdatedAt() {
+	public Instant getUpdatedAt() {
 		return updatedAt;
 	}
-	public void setUpdatedAt(LocalDateTime updatedAt) {
+	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
     

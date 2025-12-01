@@ -1,10 +1,10 @@
 package com.transactionservice.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = @Index(name = "idx_user_id", columnList = "userId"))
 public class Transaction {
 
     @Id
@@ -13,25 +13,25 @@ public class Transaction {
 
     private Long userId;
     private Double amount;
-    private String category;
+    private Long categoryId;
     private String description;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = Instant.now();
     }
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public Double getAmount() { return amount; }
-    public String getCategory() { return category; }
+    public Long getCategoryId() { return categoryId; }
     public String getDescription() { return description; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Instant getCreatedAt() { return createdAt; }
 
     public void setUserId(Long userId) { this.userId = userId; }
     public void setAmount(Double amount) { this.amount = amount; }
-    public void setCategory(String category) { this.category = category; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public void setDescription(String description) { this.description = description; }
 }

@@ -1,73 +1,81 @@
 package com.transactionservice.demo.dto;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 public class TransactionResponse {
     private Long id;
     private Long userId;
     private String title;
-    private String category;
+    private Long categoryId;
     private double amount;
-    private LocalDate date;
+    private String currency;
+    private Instant createdAt;
 
     public TransactionResponse() {}
 
-    public TransactionResponse(Long id, Long userId, String title, String category, double amount, LocalDate date) {
+    public TransactionResponse(Long id, Long userId, String title, Long categoryId, double amount, String currency, Instant createdAt) {
         this.id = id;
         this.userId = userId;
         this.title = title;
-        this.category = category;
+        this.categoryId = categoryId;
         this.amount = amount;
-        this.date = date;
+        this.currency = currency;
+        this.createdAt = createdAt;
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getCategory() {
-		return category;
-	}
+    public Long getCategoryId() {
+        return categoryId;
+    }
 
-	public void setCategory(String category) {
-		this.category = category;
-	}
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
-	public double getAmount() {
-		return amount;
-	}
+    public double getAmount() {
+        return amount;
+    }
 
-	public void setAmount(double amount) {
-		this.amount = amount;
-	}
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public String getCurrency() {
+        return currency;
+    }
 
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 
-    // getters + setters
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

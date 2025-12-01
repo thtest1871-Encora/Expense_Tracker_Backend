@@ -1,22 +1,22 @@
 package com.transactionservice.demo.dto;
 
 public class CategoryStatResponse {
-    private String category;
+    private Long categoryId;
     private double total;
 
     public CategoryStatResponse() {
     }
 
-    public CategoryStatResponse(String category, double total) {
-        this.category = category;
+    public CategoryStatResponse(Long categoryId, double total) {
+        this.categoryId = categoryId;
         this.total = total;
     }
 
-    public String getCategory() {
-        return category;
+    public Long getCategoryId() {
+        return categoryId;
     }
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public double getTotal() {

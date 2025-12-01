@@ -8,16 +8,16 @@ public class CreateTransactionRequest {
     @Positive(message = "Amount must be positive")
     private Double amount;
 
-    @NotNull(message = "Category is required")
-    private String category;
+    @NotNull(message = "Category ID is required")
+    private Long categoryId;
 
     private String description;
 
     public Double getAmount() { return amount; }
-    public String getCategory() { return category; }
+    public Long getCategoryId() { return categoryId; }
     public String getDescription() { return description; }
 
     public void setAmount(Double amount) { this.amount = amount; }
-    public void setCategory(String category) { this.category = category; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public void setDescription(String description) { this.description = description; }
 }

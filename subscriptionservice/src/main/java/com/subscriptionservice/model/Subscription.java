@@ -2,6 +2,7 @@ package com.subscriptionservice.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "subscriptions")
@@ -18,6 +19,12 @@ public class Subscription {
     private Double amount;
     private String billingCycle; // WEEKLY, MONTHLY, YEARLY
     private LocalDate nextDueDate;
+
+    @Transient
+    private long daysUntilRenewal;
+
+    @Transient
+    private String status; // ACTIVE, OVERDUE, DUE_SOON
 
     public Subscription() {}
 
@@ -45,4 +52,10 @@ public class Subscription {
     public void setBillingCycle(String billingCycle) { this.billingCycle = billingCycle; }
     public LocalDate getNextDueDate() { return nextDueDate; }
     public void setNextDueDate(LocalDate nextDueDate) { this.nextDueDate = nextDueDate; }
+
+    public long getDaysUntilRenewal() { return daysUntilRenewal; }
+    public void setDaysUntilRenewal(long daysUntilRenewal) { this.daysUntilRenewal = daysUntilRenewal; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -32,17 +33,31 @@ public class SubscriptionService {
                 req.getBillingCycle(),
                 nextDueDate
         );
-        return repository.save(subscription);
+        Subscription saved = repository.save(subscription);
+        enrichSubscriptionData(saved);
+        return saved;
     }
 
     public List<Subscription> getUserSubscriptions(Long userId) {
-        return repository.findByUserId(userId);
+        List<Subscription> list = repository.findByUserId(userId);
+        list.forEach(this::enrichSubscriptionData);
+        return list;
     }
 
     public List<Subscription> getUpcomingRenewals() {
         LocalDate today = LocalDate.now();
         LocalDate tenDaysLater = today.plusDays(10);
-        return repository.findByNextDueDateBetween(today, tenDaysLater);
+        List<Subscription> list = repository.findByNextDueDateBetween(today, tenDaysLater);
+        list.forEach(this::enrichSubscriptionData);
+        return list;
+    }
+
+    private void enrichSubscriptionData(Subscription s) {
+        long days = ChronoUnit.DAYS.between(LocalDate.now(), s.getNextDueDate());
+        s.setDaysUntilRenewal(days);
+        if (days < 0) s.setStatus("OVERDUE");
+        else if (days <= 3) s.setStatus("DUE_SOON");
+        else s.setStatus("ACTIVE");
     }
 
     public void deleteSubscription(Long id) {
@@ -50,18 +65,29 @@ public class SubscriptionService {
     }
 
     public List<Map<String, Object>> getPredefinedPlans() {
-        return List.of(
-            Map.of("platform", "Netflix", "plan", "Basic", "amount", 199, "cycle", "MONTHLY"),
-            Map.of("platform", "Netflix", "plan", "Standard", "amount", 499, "cycle", "MONTHLY"),
-            Map.of("platform", "Netflix", "plan", "Premium", "amount", 649, "cycle", "MONTHLY"),
-            Map.of("platform", "Amazon Prime", "plan", "Monthly", "amount", 179, "cycle", "MONTHLY"),
-            Map.of("platform", "Amazon Prime", "plan", "Yearly", "amount", 1499, "cycle", "YEARLY"),
-            Map.of("platform", "Spotify", "plan", "Individual", "amount", 119, "cycle", "MONTHLY"),
-            Map.of("platform", "Spotify", "plan", "Duo", "amount", 149, "cycle", "MONTHLY"),
-            Map.of("platform", "Spotify", "plan", "Family", "amount", 179, "cycle", "MONTHLY"),
-            Map.of("platform", "Disney+", "plan", "Monthly", "amount", 299, "cycle", "MONTHLY"),
-            Map.of("platform", "Disney+", "plan", "Annual", "amount", 1499, "cycle", "YEARLY")
-        );
+        List<Map<String, Object>> plans = new java.util.ArrayList<>();
+        
+        plans.add(createPlan("Netflix", "Basic", 199, "MONTHLY"));
+        plans.add(createPlan("Netflix", "Standard", 499, "MONTHLY"));
+        plans.add(createPlan("Netflix", "Premium", 649, "MONTHLY"));
+        plans.add(createPlan("Amazon Prime", "Monthly", 179, "MONTHLY"));
+        plans.add(createPlan("Amazon Prime", "Yearly", 1499, "YEARLY"));
+        plans.add(createPlan("Spotify", "Individual", 119, "MONTHLY"));
+        plans.add(createPlan("Spotify", "Duo", 149, "MONTHLY"));
+        plans.add(createPlan("Spotify", "Family", 179, "MONTHLY"));
+        plans.add(createPlan("Disney+", "Monthly", 299, "MONTHLY"));
+        plans.add(createPlan("Disney+", "Annual", 1499, "YEARLY"));
+        
+        return plans;
+    }
+
+    private Map<String, Object> createPlan(String platform, String plan, int amount, String cycle) {
+        Map<String, Object> map = new java.util.HashMap<>();
+        map.put("platform", platform);
+        map.put("plan", plan);
+        map.put("amount", amount);
+        map.put("cycle", cycle);
+        return map;
     }
 
     private LocalDate calculateNextDueDate(String cycle) {

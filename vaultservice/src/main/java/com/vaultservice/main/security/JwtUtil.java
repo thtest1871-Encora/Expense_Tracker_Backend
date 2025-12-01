@@ -1,4 +1,4 @@
-package com.example.expense.security;
+package com.vaultservice.main.security;
 
 import java.security.Key;
 import java.util.Date;
