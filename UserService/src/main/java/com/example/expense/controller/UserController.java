@@ -19,56 +19,57 @@ public class UserController {
     public UserController(UserProfileService service) {
         this.service = service;
     }
-
-    private boolean isOwner(HttpServletRequest request, Long pathUserId) {
-        String header = request.getHeader("X-User-Id");
-        if (header == null) return false;
-
-        Long authenticatedUserId = Long.valueOf(header);
-        return authenticatedUserId.equals(pathUserId);
+    
+    private Long getUserIdFromRequest(HttpServletRequest req) {
+        return Long.valueOf(req.getHeader("X-User-Id"));
     }
 
-    @GetMapping("/{userId}")
+//    private boolean isOwner(HttpServletRequest request, Long pathUserId) {
+//        Long userId =  Long.valueOf(request.getHeader("X-User-Id"));
+//        if (userId == null) return false;
+//
+////        Long authenticatedUserId = Long.valueOf(header);
+//        return userId.equals(pathUserId);
+//    }
+
+    @GetMapping
     public ApiResponse<?> getProfile(
-            @PathVariable Long userId,
             HttpServletRequest request) {
 
-        if (!isOwner(request, userId)) {
-            return ApiResponse.error("Access denied");
-        }
+//        if (!isOwner(request, userId)) {
+//            return ApiResponse.error("Access denied");
+//        }
 
-        return ApiResponse.success("Profile retrieved", service.getByUserId(userId));
+        return ApiResponse.success("Profile retrieved", service.getByUserId(getUserIdFromRequest(request)));
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping
     public ApiResponse<?> updateProfile(
-            @PathVariable Long userId,
             @RequestBody UpdateUserProfileRequest req,
             HttpServletRequest request) {
 
-        if (!isOwner(request, userId)) {
-            return ApiResponse.error("Access denied");
-        }
+//        if (!isOwner(request, userId)) {
+//            return ApiResponse.error("Access denied");
+//        }
 
-        return ApiResponse.success("Profile updated", service.upsert(userId, req));
+        return ApiResponse.success("Profile updated", service.upsert(getUserIdFromRequest(request), req));
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping
     public ApiResponse<?> deleteProfile(
-            @PathVariable Long userId,
             HttpServletRequest request) {
 
-        if (!isOwner(request, userId)) {
-            return ApiResponse.error("Access denied");
-        }
+//        if (!isOwner(request, userId)) {
+//            return ApiResponse.error("Access denied");
+//        }
 
-        service.deleteByUserId(userId);
+        service.deleteByUserId(getUserIdFromRequest(request));
         return ApiResponse.success("Profile deleted", null);
     }
 
     // Internal call — ALLOWED via Gateway without session userId
     @PostMapping
-    public ApiResponse<UserProfileResponse> createProfile(@RequestBody CreateUserProfileRequest req){
-        return ApiResponse.success("Profile created", service.createProfile(req.getUserId(), req.getFullName()));
+    public ApiResponse<UserProfileResponse> createProfile(@RequestBody CreateUserProfileRequest req, HttpServletRequest request){
+        return ApiResponse.success("Profile created", service.createProfile(getUserIdFromRequest(request), req.getFullName()));
     }
 }

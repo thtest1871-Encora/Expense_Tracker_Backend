@@ -23,6 +23,15 @@ public class GatewayConfig {
 
                 .route("category-service", r -> r.path("/categories/**")
                         .uri("lb://category-service"))
+                
+                .route("user-service", r -> r.path("/users/**")
+                        .uri("lb://user-service"))
+                
+                .route("user-service", r -> r.path("/api/v1/vault/**")
+                        .uri("lb://vaultservice"))
+                
+                .route("user-service", r -> r.path("/subscriptions/**")
+                        .uri("lb://subscription-service"))
 
                 .build();
     }
