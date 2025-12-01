@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -75,5 +76,12 @@ public class NotificationController {
     	Long userId = Long.valueOf(request.getHeader("X-User-Id"));
         service.deleteAllNotifications(userId);
         return ApiResponse.success("Notification deleted", "deleted");
+    }
+
+    @PatchMapping("/read-all")
+    public ApiResponse<String> readAll(HttpServletRequest request) {
+        Long userId = Long.valueOf(request.getHeader("X-User-Id"));
+        service.markAllAsRead(userId);
+        return ApiResponse.success("Notifications marked as read", "ok");
     }
 }

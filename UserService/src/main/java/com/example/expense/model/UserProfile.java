@@ -1,11 +1,9 @@
 package com.example.expense.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -23,11 +21,9 @@ public class UserProfile {
     private String phone;
     private String avatarUrl;
 
-    @Column(columnDefinition = "DATETIME")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    @Column(columnDefinition = "DATETIME")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     public UserProfile() {}
 
@@ -40,13 +36,13 @@ public class UserProfile {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = Instant.now();
     }
 
 	public Long getUserId() {
@@ -81,19 +77,19 @@ public class UserProfile {
 		this.avatarUrl = avatarUrl;
 	}
 
-	public LocalDateTime getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(LocalDateTime createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
 
-	public LocalDateTime getUpdatedAt() {
+	public Instant getUpdatedAt() {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(LocalDateTime updatedAt) {
+	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
     

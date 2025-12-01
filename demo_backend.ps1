@@ -189,6 +189,7 @@ try {
 Print-Section "5c. TRANSACTION SERVICE: FILTER & SUMMARIES"
 
 # Filter by Type (INCOME)
+# Expected Output: Only INCOME transactions (positive amounts), strictly filtered by INCOME categories.
 Print-Request "GET" "/transactions/filter?type=INCOME" $null
 try {
     $FilterResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/filter?type=INCOME" -Method Get -Headers $Headers
@@ -198,15 +199,18 @@ try {
 }
 
 # Monthly Summary
-Print-Request "GET" "/transactions/summary/monthly?year=2025" $null
+$CurrentYear = (Get-Date).Year
+Print-Request "GET" "/transactions/summary/monthly?year=$CurrentYear" $null
 try {
-    $MonthlyResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/summary/monthly?year=2025" -Method Get -Headers $Headers
+    $MonthlyResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/summary/monthly?year=$CurrentYear" -Method Get -Headers $Headers
     Print-Response $MonthlyResponse
 } catch {
     Print-Error $_.Exception.Message
 }
 
 # Category Summary
+# Expected Output: List of categories with 'categoryName', 'categoryEmoji', 'categoryType'.
+# 'totalAmount' should be absolute value for expenses. Only user's categories included.
 Print-Request "GET" "/transactions/summary/by-category" $null
 try {
     $CatSummaryResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/summary/by-category" -Method Get -Headers $Headers
@@ -220,6 +224,8 @@ Print-Section "6. NOTIFICATION SERVICE: CHECK ALERTS & MARK READ"
 Write-Host "(Checking for alerts triggered by the transactions above...)" -ForegroundColor DarkGray
 Start-Sleep -Seconds 2
 
+# Expected Output: Messages formatted as "₹{amount} spent on {category}" or "₹{amount} received from {category}".
+# Timestamps should be in UTC ISO format (e.g., "2025-12-01T16:49:49Z").
 Print-Request "GET" "/notifications" $null
 
 try {

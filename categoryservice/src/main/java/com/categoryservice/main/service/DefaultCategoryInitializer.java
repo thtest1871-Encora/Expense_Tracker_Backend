@@ -23,9 +23,7 @@ public class DefaultCategoryInitializer {
             new DefaultCategory("Transport", "EXPENSE", "🚌"),
             new DefaultCategory("Shopping", "EXPENSE", "🛍️"),
             new DefaultCategory("Salary", "INCOME", "💼"),
-            new DefaultCategory("Investments", "INCOME", "📈"),
-            new DefaultCategory("General Income", "INCOME", "💰"),
-            new DefaultCategory("General Expense", "EXPENSE", "📦")
+            new DefaultCategory("Investments", "INCOME", "📈")
     );
 
     @Transactional

@@ -41,6 +41,11 @@ public class SubscriptionController {
         return ApiResponse.success("Predefined plans retrieved", service.getPredefinedPlans());
     }
 
+    @GetMapping("/plans/default")
+    public ApiResponse<List<java.util.Map<String, Object>>> getPredefinedPlansDefault() {
+        return ApiResponse.success("Predefined plans retrieved", service.getPredefinedPlans());
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteSubscription(@PathVariable Long id) {
         service.deleteSubscription(id);

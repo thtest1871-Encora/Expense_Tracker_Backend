@@ -43,6 +43,11 @@ public class UserController {
         return ApiResponse.success("Profile retrieved", service.getByUserId(getUserIdFromRequest(request)));
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<?> getProfileById(@PathVariable Long id) {
+        return ApiResponse.success("Profile retrieved", service.getByUserId(id));
+    }
+
     @PutMapping
     public ApiResponse<?> updateProfile(
             @RequestBody UpdateUserProfileRequest req,

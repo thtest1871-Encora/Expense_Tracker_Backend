@@ -35,6 +35,11 @@ public class CategoryController {
         return ResponseEntity.ok(service.getAll(userId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getCategoryById(id));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> update(
             @RequestHeader("X-User-Id") Long userId,

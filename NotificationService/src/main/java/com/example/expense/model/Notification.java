@@ -1,6 +1,6 @@
 package com.example.expense.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +31,7 @@ public class Notification {
     private String message;
 
     @Column(name="created_at")
-    private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+    private Instant createdAt = Instant.now();
 
     private String status = "UNREAD";
 
@@ -49,7 +49,7 @@ public class Notification {
         this.message = message;
         this.txnId = txnId;
         this.subscriptionId = subscriptionId;
-        this.createdAt = new Timestamp(System.currentTimeMillis());
+        this.createdAt = Instant.now();
         this.status = "UNREAD";
     }
 
@@ -85,11 +85,11 @@ public class Notification {
 		this.message = message;
 	}
 
-	public Timestamp getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
 

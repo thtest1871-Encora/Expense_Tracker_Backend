@@ -38,14 +38,17 @@ public class UserProfileService {
     
     public UserProfileResponse createProfile(Long userId, String fullName) {
 
-        if (repo.findByUserId(userId).isPresent()) {
-            throw new RuntimeException("Profile already exists");
-        }
-
-        UserProfile profile = new UserProfile(userId, fullName, null, null);
-        repo.save(profile);
-
-        return toResponse(profile);
+        return repo.findByUserId(userId)
+                .map(existing -> {
+                    // If exists, maybe update name? Or just return.
+                    // For safety/idempotency, let's just return existing.
+                    return toResponse(existing);
+                })
+                .orElseGet(() -> {
+                    UserProfile profile = new UserProfile(userId, fullName, null, null);
+                    repo.save(profile);
+                    return toResponse(profile);
+                });
     }
     
     public void deleteByUserId(Long userId) {

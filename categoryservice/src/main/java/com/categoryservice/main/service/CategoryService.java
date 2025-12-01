@@ -72,6 +72,16 @@ public class CategoryService {
     }
 
     // -----------------------------------------------------------
+    // GET BY ID (Internal/Public)
+    // -----------------------------------------------------------
+    @Transactional(readOnly = true)
+    public CategoryResponse getCategoryById(Long id) {
+        Category c = repo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+        return new CategoryResponse(c.getId(), c.getName(), c.getType(), c.getEmoji());
+    }
+
+    // -----------------------------------------------------------
     // UPDATE
     // -----------------------------------------------------------
     @Transactional
