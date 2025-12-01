@@ -26,6 +26,11 @@ public class VaultFile {
 
     private String description;
 
+    private String keyPath;
+    private String originalName;
+    private Long size;
+    private String type;
+
     private LocalDate date; // <-- UPDATED
 
     private String category;
@@ -51,6 +56,18 @@ public class VaultFile {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getKeyPath() { return keyPath; }
+    public void setKeyPath(String keyPath) { this.keyPath = keyPath; }
+
+    public String getOriginalName() { return originalName; }
+    public void setOriginalName(String originalName) { this.originalName = originalName; }
+
+    public Long getSize() { return size; }
+    public void setSize(Long size) { this.size = size; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }

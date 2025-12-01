@@ -3,10 +3,14 @@ package com.vaultservice.main.controller;
 import com.vaultservice.main.dto.FileResponse;
 import com.vaultservice.main.model.VaultFile;
 import com.vaultservice.main.service.VaultService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -52,9 +56,25 @@ public class VaultController {
         return ResponseEntity.ok(vaultService.listFiles(userId));
     }
 
+    @GetMapping("/files/{id}")
+    public ResponseEntity<Resource> downloadFile(
+            @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id) throws MalformedURLException {
+
+        VaultFile metadata = vaultService.getVaultFile(id, userId);
+        Resource resource = vaultService.downloadFile(id, userId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(metadata.getType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + metadata.getOriginalName() + "\"")
+                .body(resource);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        vaultService.deleteFile(id);
+    public ResponseEntity<Void> delete(
+            @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id) {
+        vaultService.deleteFile(id, userId);
         return ResponseEntity.noContent().build();
     }
     

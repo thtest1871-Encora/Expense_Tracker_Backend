@@ -274,12 +274,11 @@ try {
 }
 
 # 8. Vault Service
-Print-Section "8. VAULT SERVICE: UPLOAD & LIST FILES (OPTIONAL)"
-Write-Host "⚠ Vault Service optional - currently may return 500" -ForegroundColor Yellow
+Print-Section "8. VAULT SERVICE: UPLOAD, DOWNLOAD & DELETE"
 
 # Create a dummy file
 $FilePath = "$PWD\receipt_demo.txt"
-"This is a demo receipt content" | Set-Content -Path $FilePath
+"This is a demo receipt content for S3 upload" | Set-Content -Path $FilePath
 
 $FileName = "receipt_demo.txt"
 $Boundary = "---------------------------" + [System.Guid]::NewGuid().ToString()
@@ -308,14 +307,40 @@ Print-Request "POST" "/api/v1/vault/upload" @{ file="receipt_demo.txt"; descript
 try {
     $UploadResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/upload" -Method Post -Headers $Headers -ContentType "multipart/form-data; boundary=$Boundary" -Body $BodyLines
     Print-Response $UploadResponse
+    $FileId = $UploadResponse.id
 
     # List Files
     Print-Request "GET" "/api/v1/vault/list" $null
     $ListResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/list" -Method Get -Headers $Headers
     Print-Response $ListResponse
 
+    # Download File
+    if ($FileId) {
+        Print-Request "GET" "/api/v1/vault/files/$FileId" $null
+        try {
+            $DownloadResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/files/$FileId" -Method Get -Headers $Headers
+            Write-Host "Downloaded Content Preview: $DownloadResponse" -ForegroundColor Cyan
+        } catch {
+            Print-Error "Download failed: $($_.Exception.Message)"
+        }
+        
+        # Delete File
+        Print-Request "DELETE" "/api/v1/vault/$FileId" $null
+        try {
+            Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/$FileId" -Method Delete -Headers $Headers
+            Write-Host "File deleted successfully." -ForegroundColor Green
+        } catch {
+            Print-Error "Delete failed: $($_.Exception.Message)"
+        }
+    }
+
 } catch {
-    Write-Warning "Vault currently unavailable - skipping validation. Error: $($_.Exception.Message)"
+    Print-Error "Vault Service Error: $($_.Exception.Message)"
+    if ($_.Exception.Response) {
+        $Stream = $_.Exception.Response.GetResponseStream()
+        $Reader = New-Object System.IO.StreamReader($Stream)
+        Write-Host $Reader.ReadToEnd() -ForegroundColor Red
+    }
 }
 
 if (Test-Path $FilePath) { Remove-Item $FilePath }
