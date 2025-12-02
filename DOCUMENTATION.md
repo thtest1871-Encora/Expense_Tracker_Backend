@@ -157,6 +157,23 @@ sequenceDiagram
     Note over Client, Auth: If User Service fails, Auth Service rolls back (deletes user).
 ```
 
+## ⚙️ Global Configuration
+
+### 1. CORS (Cross-Origin Resource Sharing)
+All microservices are configured to allow requests from **any origin (`*`)**.
+*   **Allowed Methods:** GET, POST, PUT, DELETE, OPTIONS, PATCH
+*   **Allowed Headers:** All (`*`)
+*   **Exposed Headers:** `Authorization`
+
+### 2. Standard Error Responses
+All API errors follow a standard JSON format:
+```json
+{
+  "status": "error",
+  "message": "Category type does not match transaction amount"
+}
+```
+
 ---
 
 ## 🔌 API Usage Guide
@@ -187,15 +204,37 @@ The backend uses **JWT (JSON Web Tokens)**. You cannot access data without a tok
 | **User** | PUT | `/users` | Update profile (DOB, Age, Phone) |
 | **Categories** | GET | `/api/categories` | Get all categories for user |
 | **Categories** | POST | `/api/categories` | Create custom category |
-| **Transactions** | POST | `/transactions` | Create Income/Expense |
-| **Transactions** | GET | `/transactions/filter?type=EXPENSE` | Get only expenses |
+| **Transactions** | POST | `/transactions` | Create Income/Expense (Strict Validation) |
+| **Transactions** | GET | `/transactions/filter?type=EXPENSE` | Get only expenses (Sorted Newest First) |
 | **Summary** | GET | `/transactions/summary/by-category` | Get totals grouped by category |
 | **Notifications** | GET | `/notifications` | Get user alerts |
 | **Bills (Vault)** | POST | `/api/v1/bills/upload` | Upload receipt image (Multipart) |
 | **Bills (Vault)** | GET | `/api/v1/bills` | List uploaded bills |
 | **Bills (Vault)** | GET | `/api/v1/bills/filter` | Filter bills by `categoryId`, `from`, `to` |
 
-### 3. File Uploads (Vault Service)
+### 3. Transaction Rules & Validation
+
+The Transaction Service enforces strict rules to ensure data integrity:
+
+*   **Income:** Must have a **positive** amount.
+*   **Expense:** Must have a **negative** amount (if you send a positive amount for an Expense category, it is automatically converted to negative).
+*   **Category Validation:** The system checks if the Category Type matches the amount (e.g., you cannot add a negative amount to an "INCOME" category).
+*   **Sorting:** All transaction lists are returned sorted by **Date (Newest First)**.
+
+**Response Example (Enriched Metadata):**
+```json
+{
+    "id": 101,
+    "amount": -50.00,
+    "description": "Lunch",
+    "categoryName": "Food",
+    "categoryEmoji": "🍔",
+    "categoryType": "EXPENSE",
+    "createdAt": "2025-12-02T12:00:00Z"
+}
+```
+
+### 4. File Uploads (Vault Service)
 
 The **Vault Service** handles file uploads (e.g., receipts, invoices).
 

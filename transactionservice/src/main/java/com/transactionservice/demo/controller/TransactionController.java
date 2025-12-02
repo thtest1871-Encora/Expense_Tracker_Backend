@@ -2,6 +2,7 @@ package com.transactionservice.demo.controller;
 
 import com.transactionservice.demo.dto.ApiResponse;
 import com.transactionservice.demo.dto.CreateTransactionRequest;
+import com.transactionservice.demo.dto.TransactionResponse;
 import com.transactionservice.demo.model.Transaction;
 import com.transactionservice.demo.service.TransactionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,15 +28,15 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ApiResponse<Transaction> create(@RequestBody @jakarta.validation.Valid CreateTransactionRequest req,
+    public ApiResponse<TransactionResponse> create(@RequestBody @jakarta.validation.Valid CreateTransactionRequest req,
                               HttpServletRequest request) {
-        Transaction tx = service.create(getUserIdFromRequest(request), req);
+        TransactionResponse tx = service.create(getUserIdFromRequest(request), req);
         return ApiResponse.success("Transaction created successfully", tx);
     }
 
     @GetMapping
-    public ApiResponse<List<Transaction>> getUserTransactions(HttpServletRequest request) {
-        List<Transaction> list = service.getByUser(getUserIdFromRequest(request));
+    public ApiResponse<List<TransactionResponse>> getUserTransactions(HttpServletRequest request) {
+        List<TransactionResponse> list = service.getByUser(getUserIdFromRequest(request));
         return ApiResponse.success("Transactions retrieved", list);
     }
 
