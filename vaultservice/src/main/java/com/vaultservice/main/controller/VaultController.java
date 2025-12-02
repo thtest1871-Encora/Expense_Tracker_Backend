@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/vault")
+@RequestMapping("/api/v1/bills")
 public class VaultController {
 
     private final VaultService vaultService;
@@ -28,9 +28,9 @@ public class VaultController {
     public ResponseEntity<FileResponse> upload(
             @RequestHeader("X-User-Id") Long userId,
             @RequestPart("file") MultipartFile file,
-            @RequestParam("description") String description,
+            @RequestParam("billDescription") String description,
             @RequestParam(value = "date", required = false) String date,
-            @RequestParam("category") String category
+            @RequestParam("categoryId") Long categoryId
     ) throws Exception {
 
         LocalDate parsedDate;
@@ -44,19 +44,19 @@ public class VaultController {
         }
 
         FileResponse response = vaultService.uploadFile(
-                userId, file, description, parsedDate, category
+                userId, file, description, parsedDate, categoryId
         );
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<List<VaultFile>> listFiles(
             @RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(vaultService.listFiles(userId));
     }
 
-    @GetMapping("/files/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Resource> downloadFile(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) throws MalformedURLException {
@@ -81,7 +81,7 @@ public class VaultController {
     @GetMapping("/filter")
     public ResponseEntity<List<VaultFile>> filter(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to
     ) {
@@ -97,9 +97,9 @@ public class VaultController {
         List<VaultFile> result;
 
         // CASE 2: date range + category
-        if (category != null && !category.isEmpty()) {
+        if (categoryId != null) {
             result = vaultService.filterByCategoryAndDateRange(
-                    userId, category, startDate, endDate
+                    userId, categoryId, startDate, endDate
             );
         }
         // CASE 1: only date range

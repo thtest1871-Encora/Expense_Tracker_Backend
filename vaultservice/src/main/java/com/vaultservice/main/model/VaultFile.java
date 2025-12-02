@@ -9,12 +9,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 @Entity
-@Table(name = "vault_files")
+@Table(name = "bills")
 public class VaultFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name="bill_id", unique=true, nullable=false)
+    private String billId; // UUID
 
     @Column(name="user_id", nullable=false)
     private Long userId;
@@ -31,9 +34,10 @@ public class VaultFile {
     private Long size;
     private String type;
 
-    private LocalDate date; // <-- UPDATED
+    private LocalDate date;
 
-    private String category;
+    @Column(name="category_id")
+    private Long categoryId;
 
     @Column(name="created_at")
     private LocalDateTime createdAt;
@@ -41,9 +45,22 @@ public class VaultFile {
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    public void prePersist() {
+        if (this.billId == null) {
+            this.billId = java.util.UUID.randomUUID().toString();
+        }
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
+
     // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getBillId() { return billId; }
+    public void setBillId(String billId) { this.billId = billId; }
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
@@ -72,8 +89,8 @@ public class VaultFile {
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

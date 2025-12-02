@@ -73,6 +73,11 @@
             <artifactId>s3</artifactId>
             <version>2.25.10</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>apache-client</artifactId>
+            <version>2.25.10</version>
+        </dependency>
 
         <!-- Multipart handling -->
         <dependency>

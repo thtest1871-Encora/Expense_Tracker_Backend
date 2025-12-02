@@ -102,6 +102,22 @@ The backend uses **JWT (JSON Web Tokens)**. You cannot access data without a tok
 | **Transactions** | GET | `/transactions/filter?type=EXPENSE` | Get only expenses |
 | **Summary** | GET | `/transactions/summary/by-category` | Get totals grouped by category |
 | **Notifications** | GET | `/notifications` | Get user alerts |
+| **Bills (Vault)** | POST | `/api/v1/bills/upload` | Upload receipt image (Multipart) |
+| **Bills (Vault)** | GET | `/api/v1/bills` | List uploaded bills |
+
+### 3. File Uploads (Vault Service)
+
+The **Vault Service** handles file uploads (e.g., receipts, invoices).
+
+*   **Endpoint:** `POST /api/v1/bills/upload`
+*   **Content-Type:** `multipart/form-data` (Not JSON)
+*   **Form Fields:**
+    *   `file`: The file object (Image/PDF).
+    *   `billDescription`: Text description (e.g., "Lunch Receipt").
+    *   `categoryId`: ID of the category (e.g., `190`).
+    *   `date`: (Optional) Date in `YYYY-MM-DD` format. Defaults to today.
+
+> **Note:** Files are stored in AWS S3. If you receive a `403 Forbidden` on download/delete, it means the backend has write-only access to the cloud storage for security.
 
 ---
 

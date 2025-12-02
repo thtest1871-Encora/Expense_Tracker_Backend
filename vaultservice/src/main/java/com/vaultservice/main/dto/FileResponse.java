@@ -15,20 +15,20 @@ public class FileResponse {
    
     private LocalDate date;
 
-    private String category;
+    private Long categoryId;
 
     
     private LocalDateTime createdAt;
 
     public FileResponse(Long id, String filename, String fileUrl,
-                        String description, LocalDate date, String category,
+                        String description, LocalDate date, Long categoryId,
                         LocalDateTime createdAt) {
         this.id = id;
         this.filename = filename;
         this.fileUrl = fileUrl;
         this.description = description;
         this.date = date;
-        this.category = category;
+        this.categoryId = categoryId;
         this.createdAt = createdAt;
     }
 
@@ -39,6 +39,6 @@ public class FileResponse {
 
     public LocalDate getDate() { return date; }
 
-    public String getCategory() { return category; }
+    public Long getCategoryId() { return categoryId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
