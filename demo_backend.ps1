@@ -40,6 +40,10 @@ function Print-Error ($Message) {
     Write-Host "ERROR: $Message" -ForegroundColor Red
 }
 
+function Print-Trace ($Message) {
+    Write-Host "   [INTER-SERVICE TRACE] $Message" -ForegroundColor DarkYellow
+}
+
 # --- Main Execution ---
 
 Clear-Host
@@ -161,6 +165,10 @@ $TxBodyExp = @{
 }
 
 Print-Request "POST" "/transactions (EXPENSE)" $TxBodyExp
+Print-Trace "Transaction Service receives request..."
+Print-Trace "-> Calls Category Service (GET /api/categories/$CategoryIdExp) to validate ID & fetch Emoji..."
+Print-Trace "-> Saves Transaction to Database..."
+Print-Trace "-> Calls Notification Service (POST /notifications/internal) to trigger alert..."
 
 try {
     $TxResponseExp = Invoke-RestMethod -Uri "$BaseUrl/transactions" -Method Post -Headers $Headers -Body ($TxBodyExp | ConvertTo-Json) -ContentType "application/json"
@@ -177,6 +185,10 @@ $TxBodyInc = @{
 }
 
 Print-Request "POST" "/transactions (INCOME)" $TxBodyInc
+Print-Trace "Transaction Service receives request..."
+Print-Trace "-> Calls Category Service (GET /api/categories/$CategoryIdInc) to validate ID..."
+Print-Trace "-> Saves Transaction..."
+Print-Trace "-> Calls Notification Service to trigger alert..."
 
 try {
     $TxResponseInc = Invoke-RestMethod -Uri "$BaseUrl/transactions" -Method Post -Headers $Headers -Body ($TxBodyInc | ConvertTo-Json) -ContentType "application/json"
@@ -191,6 +203,10 @@ Print-Section "5c. TRANSACTION SERVICE: FILTER & SUMMARIES"
 # Filter by Type (INCOME)
 # Expected Output: Only INCOME transactions (positive amounts), strictly filtered by INCOME categories.
 Print-Request "GET" "/transactions/filter?type=INCOME" $null
+Print-Trace "Transaction Service needs to filter by 'INCOME'..."
+Print-Trace "-> Calls Category Service to get ALL category IDs that are type='INCOME'..."
+Print-Trace "-> Queries Database using those Category IDs..."
+
 try {
     $FilterResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/filter?type=INCOME" -Method Get -Headers $Headers
     Print-Response $FilterResponse
@@ -212,6 +228,10 @@ try {
 # Expected Output: List of categories with 'categoryName', 'categoryEmoji', 'categoryType'.
 # 'totalAmount' should be absolute value for expenses. Only user's categories included.
 Print-Request "GET" "/transactions/summary/by-category" $null
+Print-Trace "Transaction Service calculates totals from DB..."
+Print-Trace "-> Calls Category Service (GET /api/categories) to fetch names & emojis for the IDs..."
+Print-Trace "-> Merges data to return full summary..."
+
 try {
     $CatSummaryResponse = Invoke-RestMethod -Uri "$BaseUrl/transactions/summary/by-category" -Method Get -Headers $Headers
     Print-Response $CatSummaryResponse
