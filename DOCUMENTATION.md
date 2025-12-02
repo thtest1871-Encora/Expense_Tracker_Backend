@@ -137,6 +137,26 @@ sequenceDiagram
     Tx-->>Client: Returns Enriched Summary
 ```
 
+#### C. User Signup Flow (New)
+When a user registers, the Auth Service automatically creates a base profile in the User Service.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Auth as Auth Service
+    participant User as User Service
+    participant DB as MySQL
+
+    Client->>Auth: POST /auth/register
+    Auth->>DB: Save User Credentials (Auth DB)
+    Auth->>User: POST /users/internal/base-profile
+    User->>DB: Create Base Profile (User DB)
+    User-->>Auth: 200 OK
+    Auth-->>Client: 200 OK (Registration Complete)
+    
+    Note over Client, Auth: If User Service fails, Auth Service rolls back (deletes user).
+```
+
 ---
 
 ## 🔌 API Usage Guide
@@ -164,6 +184,7 @@ The backend uses **JWT (JSON Web Tokens)**. You cannot access data without a tok
 | Feature | Method | Endpoint | Description |
 | :--- | :--- | :--- | :--- |
 | **User** | GET | `/users/{id}` | Get user profile |
+| **User** | PUT | `/users` | Update profile (DOB, Age, Phone) |
 | **Categories** | GET | `/api/categories` | Get all categories for user |
 | **Categories** | POST | `/api/categories` | Create custom category |
 | **Transactions** | POST | `/transactions` | Create Income/Expense |
@@ -172,6 +193,7 @@ The backend uses **JWT (JSON Web Tokens)**. You cannot access data without a tok
 | **Notifications** | GET | `/notifications` | Get user alerts |
 | **Bills (Vault)** | POST | `/api/v1/bills/upload` | Upload receipt image (Multipart) |
 | **Bills (Vault)** | GET | `/api/v1/bills` | List uploaded bills |
+| **Bills (Vault)** | GET | `/api/v1/bills/filter` | Filter bills by `categoryId`, `from`, `to` |
 
 ### 3. File Uploads (Vault Service)
 

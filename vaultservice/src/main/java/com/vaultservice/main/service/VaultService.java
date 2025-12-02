@@ -126,6 +126,10 @@ public class VaultService {
         return vaultRepo.findByUserIdAndDateBetweenOrderByCreatedAtDesc(userId, start, end);
     }
 
+    public List<VaultFile> filterByCategory(Long userId, Long categoryId) {
+        return vaultRepo.findByUserIdAndCategoryIdOrderByCreatedAtDesc(userId, categoryId);
+    }
+
     public List<VaultFile> filterByCategoryAndDateRange(Long userId, Long categoryId,
                                                         LocalDate start, LocalDate end) {
         return vaultRepo.findByUserIdAndCategoryIdAndDateBetweenOrderByCreatedAtDesc(

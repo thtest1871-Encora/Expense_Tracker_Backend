@@ -14,6 +14,8 @@ public interface VaultRepository extends JpaRepository<VaultFile, Long> {
             Long userId, LocalDate start, LocalDate end
     );
 
+    List<VaultFile> findByUserIdAndCategoryIdOrderByCreatedAtDesc(Long userId, Long categoryId);
+
     List<VaultFile> findByUserIdAndCategoryIdAndDateBetweenOrderByCreatedAtDesc(
             Long userId, Long categoryId, LocalDate start, LocalDate end
     );

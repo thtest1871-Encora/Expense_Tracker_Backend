@@ -85,28 +85,25 @@ public class VaultController {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to
     ) {
-
-        // date range must always exist
-        if (from == null || to == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        LocalDate startDate = LocalDate.parse(from);
-        LocalDate endDate = LocalDate.parse(to);
-
         List<VaultFile> result;
+        LocalDate startDate = (from != null) ? LocalDate.parse(from) : null;
+        LocalDate endDate = (to != null) ? LocalDate.parse(to) : null;
 
-        // CASE 2: date range + category
-        if (categoryId != null) {
-            result = vaultService.filterByCategoryAndDateRange(
-                    userId, categoryId, startDate, endDate
-            );
+        // 1. Category + Date Range
+        if (categoryId != null && startDate != null && endDate != null) {
+            result = vaultService.filterByCategoryAndDateRange(userId, categoryId, startDate, endDate);
         }
-        // CASE 1: only date range
+        // 2. Category Only
+        else if (categoryId != null) {
+             result = vaultService.filterByCategory(userId, categoryId);
+        }
+        // 3. Date Range Only
+        else if (startDate != null && endDate != null) {
+            result = vaultService.filterByDateRange(userId, startDate, endDate);
+        }
+        // 4. No valid filter combination -> Return all files
         else {
-            result = vaultService.filterByDateRange(
-                    userId, startDate, endDate
-            );
+            result = vaultService.listFiles(userId);
         }
 
         return ResponseEntity.ok(result);
