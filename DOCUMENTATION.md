@@ -71,6 +71,74 @@ Open separate terminal tabs/windows for each service and run the following comma
 
 ---
 
+## 🏗️ System Architecture & Data Flow
+
+The backend follows a **Microservices Architecture**. Services communicate with each other using REST APIs (via Feign Clients).
+
+### 1. High-Level Architecture
+
+```mermaid
+graph TD
+    Client[Frontend / Mobile App] -->|HTTP Requests| Gateway[API Gateway :8080]
+    Gateway -->|Route: /auth| Auth[Auth Service]
+    Gateway -->|Route: /users| User[User Service]
+    Gateway -->|Route: /transactions| Tx[Transaction Service]
+    Gateway -->|Route: /api/categories| Cat[Category Service]
+    Gateway -->|Route: /notifications| Notif[Notification Service]
+    Gateway -->|Route: /subscriptions| Sub[Subscription Service]
+    Gateway -->|Route: /api/v1/bills| Vault[Vault Service]
+    
+    Eureka[Eureka Server :8761]
+    Auth -.->|Register| Eureka
+    User -.->|Register| Eureka
+    Tx -.->|Register| Eureka
+    Cat -.->|Register| Eureka
+    Notif -.->|Register| Eureka
+    Sub -.->|Register| Eureka
+    Vault -.->|Register| Eureka
+```
+
+### 2. Inter-Service Communication Examples
+
+#### A. Creating a Transaction
+When you create a transaction, multiple services work together:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Tx as Transaction Service
+    participant Cat as Category Service
+    participant Notif as Notification Service
+    participant DB as MySQL
+
+    Client->>Tx: POST /transactions
+    Tx->>Cat: GET /api/categories/{id} (Validate & Get Emoji)
+    Cat-->>Tx: Returns Category Details
+    Tx->>DB: Save Transaction
+    Tx->>Notif: POST /notifications/internal/event
+    Notif-->>Tx: Acknowledge
+    Tx-->>Client: 201 Created
+```
+
+#### B. Generating Summaries
+To calculate "Total Spent on Food", the Transaction Service needs category names:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Tx as Transaction Service
+    participant Cat as Category Service
+
+    Client->>Tx: GET /transactions/summary/by-category
+    Tx->>DB: Fetch Raw Totals (Group by CategoryID)
+    Tx->>Cat: GET /api/categories (Fetch All for User)
+    Cat-->>Tx: Returns List [ {190: "Food", ...} ]
+    Tx->>Tx: Map IDs to Names & Emojis
+    Tx-->>Client: Returns Enriched Summary
+```
+
+---
+
 ## 🔌 API Usage Guide
 
 **Base URL:** `http://localhost:8080`  
