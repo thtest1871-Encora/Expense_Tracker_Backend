@@ -37,51 +37,57 @@ public class TransactionService {
         this.categoryClient = categoryClient;
     }
 
-    private TransactionResponse toResponse(Transaction t) {
+    private TransactionResponse toResponse(Transaction t, java.util.Map<Long, CategoryDto> catMap) {
         TransactionResponse r = new TransactionResponse();
         r.setId(t.getId());
         r.setUserId(t.getUserId());
         r.setTitle(t.getDescription());
         r.setCategoryId(t.getCategoryId());
         r.setAmount(t.getAmount());
-        r.setCurrency("INR"); // Default for now
+        r.setCurrency("INR");
         r.setCreatedAt(t.getCreatedAt());
+        
+        if (catMap != null && catMap.containsKey(t.getCategoryId())) {
+            CategoryDto c = catMap.get(t.getCategoryId());
+            r.setCategoryName(c.getName());
+            r.setCategoryEmoji(c.getEmoji());
+            r.setCategoryType(c.getType());
+        }
         return r;
     }
 
     @Transactional
-    public Transaction create(Long userId, CreateTransactionRequest req) {
-        // Fetch category details first
-        String categoryName = "Unknown";
-        String categoryEmoji = "";
-        String categoryType = "EXPENSE"; // Default
-
-        if (req.getCategoryId() != null) {
-            CategoryDto cat = categoryClient.getCategoryById(req.getCategoryId());
-            if (cat != null) {
-                // Validate that the category belongs to the user
-                // Note: CategoryService usually returns only if it exists, but we should ensure it's not a system category if we want strictness.
-                // However, since we removed system categories, any category returned here should be valid.
-                // Ideally, CategoryService should enforce userId check. Assuming it does or returns public ones.
-                // But to be safe and strict as requested:
-                // "Delete all transactions where categoryId NOT IN user's created categories"
-                // We can't delete here, but we can ensure we don't create one.
-                
-                categoryName = cat.getName();
-                categoryEmoji = cat.getEmoji();
-                categoryType = cat.getType();
-            } else {
-                 throw new RuntimeException("Category not found or does not belong to user.");
-            }
-        } else {
+    public TransactionResponse create(Long userId, CreateTransactionRequest req) {
+        if (req.getCategoryId() == null) {
              throw new RuntimeException("Category ID is required.");
         }
 
+        // 1. Fetch Category
+        CategoryDto cat = categoryClient.getCategoryById(req.getCategoryId());
+        if (cat == null) {
+             throw new RuntimeException("Category not found.");
+        }
+
+        // 2. Validate Amount vs Category Type
         double amount = req.getAmount();
-        if ("EXPENSE".equalsIgnoreCase(categoryType)) {
-            amount = -Math.abs(amount);
-        } else {
+        String type = cat.getType();
+
+        if ("INCOME".equalsIgnoreCase(type)) {
+            if (amount <= 0) {
+                throw new RuntimeException("Category type does not match transaction amount. Income must be positive.");
+            }
+            // Force positive just in case, though validation above handles it
             amount = Math.abs(amount);
+        } else if ("EXPENSE".equalsIgnoreCase(type)) {
+            if (amount >= 0) {
+                // Prompt: "Convert stored value to negative if provided positive by client"
+                amount = -Math.abs(amount);
+            } else {
+                // Already negative
+                amount = -Math.abs(amount); // Ensure it's negative
+            }
+        } else {
+            throw new RuntimeException("Invalid category type: " + type);
         }
 
         Transaction tx = new Transaction();
@@ -92,27 +98,36 @@ public class TransactionService {
 
         Transaction saved = repo.save(tx);
 
-        // 🔥 Send event to Notification Service
-        String type = amount >= 0 ? "INCOME" : "EXPENSE";
-
+        // Send Notification
+        String notifType = amount >= 0 ? "INCOME" : "EXPENSE";
         TransactionEvent event = new TransactionEvent(
                 saved.getId(),
                 saved.getUserId(),
-                type,
+                notifType,
                 Math.abs(saved.getAmount()),
                 saved.getCategoryId(),
-                categoryName,
-                categoryEmoji,
+                cat.getName(),
+                cat.getEmoji(),
                 saved.getDescription()
         );
-
         notificationClient.sendTransactionNotification(event);
 
-        return saved;
+        // Return Response with Metadata
+        return toResponse(saved, java.util.Map.of(cat.getId(), cat));
     }
 
-    public List<Transaction> getByUser(Long userId) {
-        return repo.findByUserId(userId);
+    public List<TransactionResponse> getByUser(Long userId) {
+        List<Transaction> list = repo.findByUserId(userId);
+        
+        // Fetch all categories for mapping
+        List<CategoryDto> categories = categoryClient.getCategories(userId);
+        java.util.Map<Long, CategoryDto> catMap = categories.stream()
+                .collect(java.util.stream.Collectors.toMap(CategoryDto::getId, c -> c));
+
+        return list.stream()
+                .sorted(java.util.Comparator.comparing(Transaction::getCreatedAt).reversed()) // Sort DESC
+                .map(t -> toResponse(t, catMap))
+                .toList();
     }
 
     @Transactional
@@ -121,7 +136,6 @@ public class TransactionService {
                 .filter(t -> t.getUserId().equals(userId))
                 .ifPresentOrElse(repo::delete,
                         () -> { throw new RuntimeException("Transaction not found OR not allowed"); });
-        // Optional: notify deletion later
     }
 
     public FilterResponse filterTransactions(
@@ -138,15 +152,17 @@ public class TransactionService {
         Double minAmount = null;
         Double maxAmount = null;
 
+        // Fetch all categories for mapping & filtering
+        List<CategoryDto> categories = categoryClient.getCategories(userId);
+        java.util.Map<Long, CategoryDto> catMap = categories.stream()
+                .collect(java.util.stream.Collectors.toMap(CategoryDto::getId, c -> c));
+
         if (type != null) {
-            // Fetch all categories for user and filter by type
-            List<CategoryDto> categories = categoryClient.getCategories(userId);
             categoryIds = categories.stream()
                     .filter(c -> type.equalsIgnoreCase(c.getType()))
                     .map(CategoryDto::getId)
                     .toList();
             
-            // If no categories match the type, return empty result immediately
             if (categoryIds.isEmpty()) {
                 return new FilterResponse(0, List.of());
             }
@@ -158,7 +174,8 @@ public class TransactionService {
             }
         }
 
-        Sort sortObj = "desc".equalsIgnoreCase(sort) ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
+        // Force Sort by CreatedAt DESC
+        Sort sortObj = Sort.by("createdAt").descending();
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
         Instant startInst = (start != null) ? start.atStartOfDay().toInstant(ZoneOffset.UTC) : null;
@@ -167,7 +184,9 @@ public class TransactionService {
         Page<Transaction> pageResult = repo.filterTransactions(userId, categoryId, categoryIds, startInst, endInst, minAmount, maxAmount, pageable);
 
         List<TransactionResponse> mapped = pageResult.getContent()
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .map(t -> toResponse(t, catMap))
+                .toList();
 
         return new FilterResponse(pageResult.getTotalElements(), mapped);
     }
