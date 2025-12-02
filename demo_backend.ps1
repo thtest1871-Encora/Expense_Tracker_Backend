@@ -273,77 +273,96 @@ try {
     Print-Error $_.Exception.Message
 }
 
-# 8. Vault Service
-Print-Section "8. VAULT SERVICE: UPLOAD, DOWNLOAD & DELETE"
+# 8. Vault Service (Bills)
+Print-Section "8. BILLS SERVICE: UPLOAD, DOWNLOAD & DELETE"
 
-# Create a dummy file
-$FilePath = "$PWD\receipt_demo.txt"
-"This is a demo receipt content for S3 upload" | Set-Content -Path $FilePath
+# Image Path provided by user
+$ImagePath = "C:\Users\Aditya.Sharma3\Pictures\Screenshots\Screenshot 2025-08-11 223646.png"
 
-$FileName = "receipt_demo.txt"
-$Boundary = "---------------------------" + [System.Guid]::NewGuid().ToString()
-$LF = "`r`n"
-$FileContent = [System.IO.File]::ReadAllText($FilePath)
+if (-not (Test-Path $ImagePath)) {
+    Print-Error "Image file not found at: $ImagePath"
+    # Fallback or exit? The user specifically asked for this file. I'll exit or skip.
+    # Let's just print error and skip the upload part but continue script or exit.
+    # The original script used 'exit' on critical failures, but here maybe just skip.
+} else {
+    # Use .NET HttpClient for reliable multipart binary upload
+    Add-Type -AssemblyName System.Net.Http
+    $HttpClient = New-Object System.Net.Http.HttpClient
+    $HttpClient.DefaultRequestHeaders.Add("Authorization", "Bearer $Token")
+    $HttpClient.DefaultRequestHeaders.Add("X-User-Id", "$UserId")
 
-$BodyLines = (
-    "--$Boundary",
-    "Content-Disposition: form-data; name=`"file`"; filename=`"$FileName`"",
-    "Content-Type: text/plain",
-    "",
-    $FileContent,
-    "--$Boundary",
-    "Content-Disposition: form-data; name=`"description`"",
-    "",
-    "Lunch Receipt",
-    "--$Boundary",
-    "Content-Disposition: form-data; name=`"category`"",
-    "",
-    "Office Supplies",
-    "--$Boundary--"
-) -join $LF
+    $MultipartContent = New-Object System.Net.Http.MultipartFormDataContent
+    
+    # File Content
+    $FileStream = [System.IO.File]::OpenRead($ImagePath)
+    $StreamContent = New-Object System.Net.Http.StreamContent($FileStream)
+    $StreamContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("image/png")
+    $MultipartContent.Add($StreamContent, "file", "Screenshot.png")
 
-Print-Request "POST" "/api/v1/vault/upload" @{ file="receipt_demo.txt"; description="Lunch Receipt"; category="Office Supplies" }
+    # Other Fields
+    $MultipartContent.Add((New-Object System.Net.Http.StringContent("Lunch Receipt Screenshot")), "billDescription")
+    $MultipartContent.Add((New-Object System.Net.Http.StringContent("$CategoryIdExp")), "categoryId")
 
-try {
-    $UploadResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/upload" -Method Post -Headers $Headers -ContentType "multipart/form-data; boundary=$Boundary" -Body $BodyLines
-    Print-Response $UploadResponse
-    $FileId = $UploadResponse.id
+    Print-Request "POST" "/api/v1/bills/upload" @{ file=$ImagePath; billDescription="Lunch Receipt Screenshot"; categoryId=$CategoryIdExp }
 
-    # List Files
-    Print-Request "GET" "/api/v1/vault/list" $null
-    $ListResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/list" -Method Get -Headers $Headers
-    Print-Response $ListResponse
+    try {
+        $PostTask = $HttpClient.PostAsync("$BaseUrl/api/v1/bills/upload", $MultipartContent)
+        $PostTask.Wait()
+        $Result = $PostTask.Result
+        $ResponseContent = $Result.Content.ReadAsStringAsync().Result
 
-    # Download File
-    if ($FileId) {
-        Print-Request "GET" "/api/v1/vault/files/$FileId" $null
-        try {
-            $DownloadResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/files/$FileId" -Method Get -Headers $Headers
-            Write-Host "Downloaded Content Preview: $DownloadResponse" -ForegroundColor Cyan
-        } catch {
-            Print-Error "Download failed: $($_.Exception.Message)"
+        if ($Result.IsSuccessStatusCode) {
+            $UploadResponse = $ResponseContent | ConvertFrom-Json
+            Print-Response $UploadResponse
+            $FileId = $UploadResponse.id
+            Write-Host "Image uploaded successfully! ID: $FileId" -ForegroundColor Green
+
+            # List Files
+            Print-Request "GET" "/api/v1/bills" $null
+            $ListResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/bills" -Method Get -Headers $Headers
+            Print-Response $ListResponse
+
+            # Download File (Metadata check)
+            if ($FileId) {
+                Print-Request "GET" "/api/v1/bills/$FileId" $null
+                try {
+                    # We won't print binary content to console
+                    $DownloadResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/bills/$FileId" -Method Get -Headers $Headers
+                    Write-Host "File downloaded successfully (Binary content received)." -ForegroundColor Cyan
+                } catch {
+                    $Ex = $_.Exception
+                    if ($Ex.Response.StatusCode -eq [System.Net.HttpStatusCode]::Forbidden) {
+                            Print-Error "Download failed: 403 Forbidden. (This is likely due to AWS IAM 'Explicit Deny' on GetObject for this user. Upload worked, so keys are valid.)"
+                    } else {
+                            Print-Error "Download failed: $($Ex.Message)"
+                    }
+                }
+                
+                # Delete File
+                Print-Request "DELETE" "/api/v1/bills/$FileId" $null
+                try {
+                    Invoke-RestMethod -Uri "$BaseUrl/api/v1/bills/$FileId" -Method Delete -Headers $Headers
+                    Write-Host "File deleted successfully." -ForegroundColor Green
+                } catch {
+                    $Ex = $_.Exception
+                    if ($Ex.Response.StatusCode -eq [System.Net.HttpStatusCode]::Forbidden) {
+                            Print-Error "Delete failed: 403 Forbidden. (This is likely due to AWS IAM 'Explicit Deny' on DeleteObject for this user.)"
+                    } else {
+                            Print-Error "Delete failed: $($Ex.Message)"
+                    }
+                }
+            }
+
+        } else {
+            Print-Error "Upload Failed: $($Result.StatusCode) - $ResponseContent"
         }
-        
-        # Delete File
-        Print-Request "DELETE" "/api/v1/vault/$FileId" $null
-        try {
-            Invoke-RestMethod -Uri "$BaseUrl/api/v1/vault/$FileId" -Method Delete -Headers $Headers
-            Write-Host "File deleted successfully." -ForegroundColor Green
-        } catch {
-            Print-Error "Delete failed: $($_.Exception.Message)"
-        }
-    }
-
-} catch {
-    Print-Error "Vault Service Error: $($_.Exception.Message)"
-    if ($_.Exception.Response) {
-        $Stream = $_.Exception.Response.GetResponseStream()
-        $Reader = New-Object System.IO.StreamReader($Stream)
-        Write-Host $Reader.ReadToEnd() -ForegroundColor Red
+    } catch {
+        Print-Error "Bills Service Error: $($_.Exception.Message)"
+    } finally {
+        $FileStream.Dispose()
+        $HttpClient.Dispose()
     }
 }
-
-if (Test-Path $FilePath) { Remove-Item $FilePath }
 
 Write-Host ""
 Write-Host "DEMO COMPLETE" -ForegroundColor Green

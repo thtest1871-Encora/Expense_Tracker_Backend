@@ -42,7 +42,7 @@ public class VaultService {
 
     public FileResponse uploadFile(Long userId, MultipartFile file,
                                    String description, LocalDate date,
-                                   String category) throws IOException {
+                                   Long categoryId) throws IOException {
 
         if (file.isEmpty()) {
             throw new IOException("Failed to store empty file.");
@@ -54,8 +54,8 @@ public class VaultService {
         }
 
         String originalFilename = file.getOriginalFilename();
-        String uuid = UUID.randomUUID().toString();
-        String keyPath = "vault/" + userId + "/" + uuid + "_" + originalFilename;
+        String billId = UUID.randomUUID().toString(); // Generate UUID for S3 path
+        String keyPath = "bills/" + userId + "/" + billId + "/" + originalFilename;
 
         PutObjectRequest putOb = PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -67,7 +67,8 @@ public class VaultService {
 
         VaultFile v = new VaultFile();
         v.setUserId(userId);
-        v.setFilename(uuid + "_" + originalFilename);
+        v.setBillId(billId);
+        v.setFilename(originalFilename); // Storing original filename in filename field too for compatibility
         v.setKeyPath(keyPath);
         v.setOriginalName(originalFilename);
         v.setSize(file.getSize());
@@ -75,7 +76,7 @@ public class VaultService {
         v.setFileUrl("s3://" + bucketName + "/" + keyPath);
         v.setDescription(description);
         v.setDate(date);
-        v.setCategory(category);
+        v.setCategoryId(categoryId);
         v.setCreatedAt(LocalDateTime.now());
 
         VaultFile saved = vaultRepo.save(v);
@@ -86,7 +87,7 @@ public class VaultService {
                 saved.getFileUrl(),
                 saved.getDescription(),
                 saved.getDate(),
-                saved.getCategory(),
+                saved.getCategoryId(),
                 saved.getCreatedAt()
         );
     }
@@ -125,10 +126,10 @@ public class VaultService {
         return vaultRepo.findByUserIdAndDateBetweenOrderByCreatedAtDesc(userId, start, end);
     }
 
-    public List<VaultFile> filterByCategoryAndDateRange(Long userId, String category,
+    public List<VaultFile> filterByCategoryAndDateRange(Long userId, Long categoryId,
                                                         LocalDate start, LocalDate end) {
-        return vaultRepo.findByUserIdAndCategoryAndDateBetweenOrderByCreatedAtDesc(
-                userId, category, start, end
+        return vaultRepo.findByUserIdAndCategoryIdAndDateBetweenOrderByCreatedAtDesc(
+                userId, categoryId, start, end
         );
     }
 

@@ -25,7 +25,7 @@ public class UserProfileService {
 
     public UserProfileResponse upsert(Long userId, UpdateUserProfileRequest req) {
         UserProfile profile = repo.findByUserId(userId).orElse(
-                new UserProfile(userId, req.getFullName(), req.getPhone(), req.getAvatarUrl())
+                new UserProfile(userId, req.getFullName(), null, req.getPhone(), req.getAvatarUrl())
         );
 
         if (req.getFullName() != null) profile.setFullName(req.getFullName());
@@ -36,7 +36,7 @@ public class UserProfileService {
         return toResponse(profile);
     }
     
-    public UserProfileResponse createProfile(Long userId, String fullName) {
+    public UserProfileResponse createProfile(Long userId, String fullName, String email) {
 
         return repo.findByUserId(userId)
                 .map(existing -> {
@@ -45,7 +45,7 @@ public class UserProfileService {
                     return toResponse(existing);
                 })
                 .orElseGet(() -> {
-                    UserProfile profile = new UserProfile(userId, fullName, null, null);
+                    UserProfile profile = new UserProfile(userId, fullName, email, null, null);
                     repo.save(profile);
                     return toResponse(profile);
                 });

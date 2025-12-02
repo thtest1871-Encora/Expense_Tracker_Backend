@@ -6,16 +6,22 @@ import com.authservice.demo.model.UserCredential;
 import com.authservice.demo.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
 
     private final UserRepository repo;
     private final PasswordEncoder passwordEncoder;
+    private final RestTemplate restTemplate;
 
-    public AuthService(UserRepository repo, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository repo, PasswordEncoder passwordEncoder, RestTemplate restTemplate) {
         this.repo = repo;
         this.passwordEncoder = passwordEncoder;
+        this.restTemplate = restTemplate;
     }
 
     public UserCredential register(RegisterRequest req) {
@@ -29,7 +35,24 @@ public class AuthService {
         user.setEmail(req.getEmail());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
 
-        return repo.save(user);
+        UserCredential savedUser = repo.save(user);
+
+        // Call User Service to create profile
+        try {
+            Map<String, Object> profileReq = new HashMap<>();
+            profileReq.put("userId", savedUser.getId());
+            profileReq.put("fullName", savedUser.getName());
+            profileReq.put("email", savedUser.getEmail());
+
+            restTemplate.postForObject("http://user-service/users", profileReq, Object.class);
+        } catch (Exception e) {
+            // Log error but don't fail registration? Or fail?
+            // Ideally we should use a message queue or transactional outbox.
+            // For now, just log.
+            System.err.println("Failed to create user profile: " + e.getMessage());
+        }
+
+        return savedUser;
     }
 
     public UserCredential login(LoginRequest req) {

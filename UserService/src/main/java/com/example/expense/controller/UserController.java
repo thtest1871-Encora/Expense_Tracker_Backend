@@ -75,6 +75,6 @@ public class UserController {
     // Internal call — ALLOWED via Gateway without session userId
     @PostMapping
     public ApiResponse<UserProfileResponse> createProfile(@RequestBody CreateUserProfileRequest req){
-        return ApiResponse.success("Profile created", service.createProfile(req.getUserId(), req.getFullName()));
+        return ApiResponse.success("Profile created", service.createProfile(req.getUserId(), req.getFullName(), req.getEmail()));
     }
 }
