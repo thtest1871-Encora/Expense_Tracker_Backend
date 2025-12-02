@@ -44,12 +44,11 @@ public class AuthService {
             profileReq.put("fullName", savedUser.getName());
             profileReq.put("email", savedUser.getEmail());
 
-            restTemplate.postForObject("http://user-service/users", profileReq, Object.class);
+            restTemplate.postForObject("http://user-service/users/internal/base-profile", profileReq, Object.class);
         } catch (Exception e) {
-            // Log error but don't fail registration? Or fail?
-            // Ideally we should use a message queue or transactional outbox.
-            // For now, just log.
-            System.err.println("Failed to create user profile: " + e.getMessage());
+            // Rollback: Delete the user if profile creation fails
+            repo.delete(savedUser);
+            throw new RuntimeException("User profile creation failed. Registration aborted.");
         }
 
         return savedUser;

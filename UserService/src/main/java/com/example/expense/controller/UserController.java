@@ -77,4 +77,9 @@ public class UserController {
     public ApiResponse<UserProfileResponse> createProfile(@RequestBody CreateUserProfileRequest req){
         return ApiResponse.success("Profile created", service.createProfile(req.getUserId(), req.getFullName(), req.getEmail()));
     }
+
+    @PostMapping("/internal/base-profile")
+    public ApiResponse<UserProfileResponse> createBaseProfile(@RequestBody CreateUserProfileRequest req){
+        return ApiResponse.success("Profile created", service.createProfile(req.getUserId(), req.getFullName(), req.getEmail()));
+    }
 }

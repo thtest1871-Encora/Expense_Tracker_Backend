@@ -21,6 +21,9 @@ public class UserProfile {
     private String email;
     private String phone;
     private String avatarUrl;
+    
+    private java.time.LocalDate dob;
+    private Integer age;
 
     private Instant createdAt;
 
@@ -86,6 +89,22 @@ public class UserProfile {
 	public void setAvatarUrl(String avatarUrl) {
 		this.avatarUrl = avatarUrl;
 	}
+
+    public java.time.LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(java.time.LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
 
 	public Instant getCreatedAt() {
 		return createdAt;

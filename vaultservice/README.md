@@ -18,12 +18,20 @@ The **Vault Service** acts as a secure digital filing cabinet for the Expense Tr
 - **GET** `/api/v1/bills`
 - **Returns:** List of all uploaded files for the logged-in user.
 
-### 3. Download File
+### 3. Filter Files
+- **GET** `/api/v1/bills/filter`
+- **Parameters:**
+  - `categoryId`: (Optional) Filter by category ID.
+  - `from`: (Optional) Start date (YYYY-MM-DD).
+  - `to`: (Optional) End date (YYYY-MM-DD).
+- **Example:** `/api/v1/bills/filter?categoryId=123&from=2025-01-01&to=2025-01-31`
+
+### 4. Download File
 - **GET** `/api/v1/bills/{id}`
 - **Returns:** The binary file stream (image/pdf).
 - **Note:** If you get a `403 Forbidden`, it means the backend has write-only access to S3.
 
-### 4. Delete File
+### 5. Delete File
 - **DELETE** `/api/v1/bills/{id}`
 - **Note:** Permanently removes file from S3 and database.
 

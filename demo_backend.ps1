@@ -96,23 +96,26 @@ $Headers = @{
 }
 
 # 3. User Service
-Print-Section "3. USER SERVICE: CREATE & GET PROFILE"
-$ProfileBody = @{
-    userId = $UserId
-    fullName = "Frontend Developer"
-}
-
-Print-Request "POST" "/users" $ProfileBody
+Print-Section "3. USER SERVICE: VERIFY PROFILE & UPDATE"
+# Note: Profile is now auto-created by Auth Service upon registration.
+# We will verify this by fetching it immediately.
 
 try {
-    # Create Profile
-    $ProfileResponse = Invoke-RestMethod -Uri "$BaseUrl/users" -Method Post -Headers $Headers -Body ($ProfileBody | ConvertTo-Json) -ContentType "application/json"
-    Print-Response $ProfileResponse
-
-    # Get Profile
+    # Get Profile (Verify Auto-Creation)
     Print-Request "GET" "/users/$UserId" $null
     $GetProfileResponse = Invoke-RestMethod -Uri "$BaseUrl/users/$UserId" -Method Get -Headers $Headers
     Print-Response $GetProfileResponse
+
+    # Update Profile (Add DOB & Age)
+    $UpdateBody = @{
+        dob = "1995-08-15"
+        age = 29
+        phone = "9876543210"
+    }
+    Print-Request "PUT" "/users" $UpdateBody
+    $UpdateResponse = Invoke-RestMethod -Uri "$BaseUrl/users" -Method Put -Headers $Headers -Body ($UpdateBody | ConvertTo-Json) -ContentType "application/json"
+    Print-Response $UpdateResponse
+
 } catch {
     Print-Error $_.Exception.Message
 }
@@ -356,6 +359,28 @@ if (-not (Test-Path $ImagePath)) {
                     } else {
                             Print-Error "Download failed: $($Ex.Message)"
                     }
+                }
+
+                # 8b. Filter Files
+                Print-Section "8b. BILLS SERVICE: FILTERING"
+                
+                # Filter by Category
+                Print-Request "GET" "/api/v1/bills/filter?categoryId=$CategoryIdExp" $null
+                try {
+                    $FilterCatResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/bills/filter?categoryId=$CategoryIdExp" -Method Get -Headers $Headers
+                    Print-Response $FilterCatResponse
+                } catch {
+                    Print-Error $_.Exception.Message
+                }
+
+                # Filter by Date Range (Today)
+                $Today = (Get-Date).ToString("yyyy-MM-dd")
+                Print-Request "GET" "/api/v1/bills/filter?from=$Today&to=$Today" $null
+                try {
+                    $FilterDateResponse = Invoke-RestMethod -Uri "$BaseUrl/api/v1/bills/filter?from=$Today&to=$Today" -Method Get -Headers $Headers
+                    Print-Response $FilterDateResponse
+                } catch {
+                    Print-Error $_.Exception.Message
                 }
                 
                 # Delete File

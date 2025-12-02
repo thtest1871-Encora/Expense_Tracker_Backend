@@ -31,6 +31,8 @@ public class UserProfileService {
         if (req.getFullName() != null) profile.setFullName(req.getFullName());
         if (req.getPhone() != null) profile.setPhone(req.getPhone());
         if (req.getAvatarUrl() != null) profile.setAvatarUrl(req.getAvatarUrl());
+        if (req.getDob() != null) profile.setDob(req.getDob());
+        if (req.getAge() != null) profile.setAge(req.getAge());
 
         repo.save(profile);
         return toResponse(profile);
@@ -63,6 +65,8 @@ public class UserProfileService {
         r.setFullName(p.getFullName());
         r.setPhone(p.getPhone());
         r.setAvatarUrl(p.getAvatarUrl());
+        r.setDob(p.getDob());
+        r.setAge(p.getAge());
         r.setCreatedAt(p.getCreatedAt());
         r.setUpdatedAt(p.getUpdatedAt());
         return r;

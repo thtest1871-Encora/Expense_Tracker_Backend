@@ -7,6 +7,7 @@ The **Auth Service** handles user authentication and authorization. It issues JW
 
 ### 1. Register
 - **POST** `/auth/register`
+- **Description:** Registers a new user and automatically triggers the creation of a base profile in the User Service.
 - **Body:**
   ```json
   {
