@@ -27,9 +27,9 @@ public class CategoryService {
         this.defaultCategoryInitializer = defaultCategoryInitializer;
     }
 
-    // -----------------------------------------------------------
+   
     // CREATE CATEGORY
-    // -----------------------------------------------------------
+   
     @Transactional
     public CategoryResponse createCategory(Long userId, CreateCategoryRequest req) {
 
@@ -54,16 +54,14 @@ public class CategoryService {
         return new CategoryResponse(saved.getId(), saved.getName(), saved.getType(), saved.getEmoji());
     }
 
-    // -----------------------------------------------------------
+    
     // GET ALL
-    // -----------------------------------------------------------
+    
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAll(Long userId) {
 
         if (userId == null) throw new ValidationException("User ID is required");
 
-        // 🚫 DO NOT create defaults here
-        // This is a read-only transaction
 
         return repo.findByUserId(userId)
                 .stream()
@@ -71,9 +69,9 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    // -----------------------------------------------------------
+    
     // GET BY ID (Internal/Public)
-    // -----------------------------------------------------------
+    
     @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         Category c = repo.findById(id)
@@ -81,9 +79,9 @@ public class CategoryService {
         return new CategoryResponse(c.getId(), c.getName(), c.getType(), c.getEmoji());
     }
 
-    // -----------------------------------------------------------
+    
     // UPDATE
-    // -----------------------------------------------------------
+    
     @Transactional
     public CategoryResponse updateCategory(Long id, Long userId, UpdateCategoryRequest req) {
 
@@ -105,9 +103,9 @@ public class CategoryService {
         return new CategoryResponse(saved.getId(), saved.getName(), saved.getType(), saved.getEmoji());
     }
 
-    // -----------------------------------------------------------
+    
     // DELETE
-    // -----------------------------------------------------------
+    
     @Transactional
     public void deleteCategory(Long id, Long userId) {
 

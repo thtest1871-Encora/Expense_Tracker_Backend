@@ -63,7 +63,7 @@ public class VaultService {
                 .contentType(contentType)
                 .build();
 
-        s3Client.putObject(putOb, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        s3Client.putObject(putOb, RequestBody.fromInputStream(file.getInputStream(), file.getSize())); //destination + real file
 
         VaultFile v = new VaultFile();
         v.setUserId(userId);

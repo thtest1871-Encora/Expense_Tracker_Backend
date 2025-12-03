@@ -13,7 +13,7 @@ public class CreateCategoryRequest {
 
     private String emoji;
 
-    private Long userId;   // TEMPORARY until auth service is ready
+    private Long userId;   
 
 	public String getName() {
 		return name;

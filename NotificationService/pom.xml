@@ -6,12 +6,11 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- 👇 THIS WAS MISSING -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.2.6</version>
-    <relativePath/> <!-- lookup parent from repository -->
+    <relativePath/>
   </parent>
 
   <groupId>com.example</groupId>
@@ -56,7 +55,7 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
-    <!-- Eureka Client -->
+    <!-- Eureka -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -74,34 +73,34 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
-    
-    <!-- Spring Boot Test (JUnit 5) -->
-	<dependency>
-	    <groupId>org.springframework.boot</groupId>
-	    <artifactId>spring-boot-starter-test</artifactId>
-	    <scope>test</scope>
-	</dependency>
-	
-	<!-- JWT Dependencies (Java 17/21 compatible) -->
-	<dependency>
-	    <groupId>io.jsonwebtoken</groupId>
-	    <artifactId>jjwt-api</artifactId>
-	    <version>0.11.5</version>
-	</dependency>
-	
-	<dependency>
-	    <groupId>io.jsonwebtoken</groupId>
-	    <artifactId>jjwt-impl</artifactId>
-	    <version>0.11.5</version>
-	    <scope>runtime</scope>
-	</dependency>
-	
-	<dependency>
-	    <groupId>io.jsonwebtoken</groupId>
-	    <artifactId>jjwt-jackson</artifactId>
-	    <version>0.11.5</version>
-	    <scope>runtime</scope>
-	</dependency>
+
+    <!-- Testing -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JWT -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
 
   </dependencies>
 
@@ -110,6 +109,16 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+
+        <!-- 👇 THIS IS THE IMPORTANT PART -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+
       </plugin>
     </plugins>
   </build>
