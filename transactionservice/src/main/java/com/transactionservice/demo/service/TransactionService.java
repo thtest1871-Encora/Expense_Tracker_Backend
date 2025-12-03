@@ -185,10 +185,7 @@ public class TransactionService {
         Sort sortObj = Sort.by("createdAt").descending();
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
-        Instant startInst = (start != null) ? start.atStartOfDay().toInstant(ZoneOffset.UTC) : null;
-        Instant endInst = (end != null) ? end.atTime(java.time.LocalTime.MAX).toInstant(ZoneOffset.UTC) : null;
-
-        Page<Transaction> pageResult = repo.filterTransactions(userId, categoryId, categoryIds, startInst, endInst, minAmount, maxAmount, pageable);
+        Page<Transaction> pageResult = repo.filterTransactions(userId, categoryId, categoryIds, start, end, minAmount, maxAmount, pageable);
 
         List<TransactionResponse> mapped = pageResult.getContent()
                 .stream()

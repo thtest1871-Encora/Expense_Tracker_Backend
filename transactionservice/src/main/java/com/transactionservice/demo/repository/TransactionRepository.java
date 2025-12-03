@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.transactionservice.demo.model.Transaction;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -25,8 +26,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userId") Long userId,
             @Param("categoryId") Long categoryId,
             @Param("categoryIds") List<Long> categoryIds,
-            @Param("start") Instant start,
-            @Param("end") Instant end,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
             @Param("minAmount") Double minAmount,
             @Param("maxAmount") Double maxAmount,
             Pageable pageable
