@@ -71,6 +71,7 @@ public class TransactionService {
         // 2. Validate Amount vs Category Type
         double amount = req.getAmount();
         String type = cat.getType();
+        
 
         if ("INCOME".equalsIgnoreCase(type)) {
             if (amount <= 0) {
@@ -95,6 +96,12 @@ public class TransactionService {
         tx.setAmount(amount);
         tx.setCategoryId(req.getCategoryId());
         tx.setDescription(req.getDescription());
+		if (req.getCreatedAt() != null || !LocalDate.parse(req.getCreatedAt()).isAfter(LocalDate.now())) {
+			tx.setCreatedAt(LocalDate.parse(req.getCreatedAt()));
+		}
+		else {
+			tx.setCreatedAt(LocalDate.now());
+		}
 
         Transaction saved = repo.save(tx);
 

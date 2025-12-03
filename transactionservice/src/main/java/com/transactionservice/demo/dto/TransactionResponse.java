@@ -1,6 +1,7 @@
 package com.transactionservice.demo.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public class TransactionResponse {
     private Long id;
@@ -9,7 +10,7 @@ public class TransactionResponse {
     private Long categoryId;
     private double amount;
     private String currency;
-    private Instant createdAt;
+    private LocalDate createdAt;
     
     private String categoryName;
     private String categoryEmoji;
@@ -17,7 +18,7 @@ public class TransactionResponse {
 
     public TransactionResponse() {}
 
-    public TransactionResponse(Long id, Long userId, String title, Long categoryId, double amount, String currency, Instant createdAt) {
+    public TransactionResponse(Long id, Long userId, String title, Long categoryId, double amount, String currency, LocalDate createdAt) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -75,12 +76,12 @@ public class TransactionResponse {
         this.currency = currency;
     }
 
-    public Instant getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(LocalDate localDate) {
+        this.createdAt = localDate;
     }
 
     public String getCategoryName() {

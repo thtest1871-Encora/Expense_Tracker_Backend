@@ -12,6 +12,8 @@ public class CreateTransactionRequest {
     private Long categoryId;
 
     private String description;
+    
+    private String createdAt;
 
     public Double getAmount() { return amount; }
     public Long getCategoryId() { return categoryId; }
@@ -20,4 +22,13 @@ public class CreateTransactionRequest {
     public void setAmount(Double amount) { this.amount = amount; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public void setDescription(String description) { this.description = description; }
+    
+	public String getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
+	}
+    
+    
 }
